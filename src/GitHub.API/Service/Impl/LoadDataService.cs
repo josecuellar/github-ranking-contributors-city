@@ -80,11 +80,11 @@ namespace GitHub.API.Repository.Impl
 
         private void Persist(List<Octokit.User> users, string location)
         {
-            new Thread(() =>
-            {
-                Thread.CurrentThread.IsBackground = true;
+            //new Thread(() =>
+            //{
+                //Thread.CurrentThread.IsBackground = true;
                 _persistenceRepository.CreateListIfNotExists(users.ConvertAll<Model.User>(item => new Model.User(item.Id, item.Login, location, item.HtmlUrl, 0)));
-            }).Start();
+            //}).Start();
         }
 
         private void CheckLimitGithubRemaining(RateLimit limits)

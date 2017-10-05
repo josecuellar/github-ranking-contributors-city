@@ -46,7 +46,7 @@ namespace GitHub.API.Repository.Impl
             {
                 using (var cnn = DbConnection())
                 {
-                    if (!ExistGitHubUser(user.Id))
+                    if (!cnn.Query<bool>(@"SELECT 1 FROM Users WHERE GitHubId = @GitHubId", new { GitHubId = user.Id }).FirstOrDefault())
                     {
                         await cnn.ExecuteAsync(
                             @"INSERT INTO Users ( GitHubId, Login, Location, Url, TotalCommits ) VALUES ( @GitHubId, @Login, @Location, @Url, @TotalCommits );",
@@ -56,7 +56,7 @@ namespace GitHub.API.Repository.Impl
             }
             catch (Exception err)
             {
-                Debug.Print(err.Message);
+                Debug.Print("CreateIfNotExists: " + err.Message);
             }
         }
 
@@ -72,7 +72,7 @@ namespace GitHub.API.Repository.Impl
 
                     var paramsUser = new { GitHubId = user.Id, Login = user.Login, Location = user.Location, Url = user.Url, TotalCommits = user.TotalCommits };
 
-                    if (ExistGitHubUser(user.Id))
+                    if (cnn.Query<bool>(@"SELECT 1 FROM Users WHERE GitHubId = @GitHubId", new { GitHubId = user.Id }).FirstOrDefault())
                         await cnn.ExecuteAsync(@"UPDATE Users SET Login = @Login, Location = @Location, Url = @Url, TotalCommits = @TotalCommits WHERE GitHubId = @GitHubId;", paramsUser);
                     else
                         await cnn.ExecuteAsync(@"INSERT INTO Users ( GitHubId, Login, Location, Url, TotalCommits ) VALUES ( @GitHubId, @Login, @Location, @Url, @TotalCommits);", paramsUser);
@@ -80,16 +80,7 @@ namespace GitHub.API.Repository.Impl
             }
             catch (Exception err)
             {
-                Debug.Print(err.Message);
-            }
-        }
-
-        private bool ExistGitHubUser(long gitHubId)
-        {
-            using (var cnn = DbConnection())
-            {
-                cnn.Open();
-                return cnn.Query<bool>(@"SELECT 1 FROM Users WHERE GitHubId = @GitHubId", new { GitHubId = gitHubId }).FirstOrDefault();
+                Debug.Print("Save: " + err.Message);
             }
         }
     }
