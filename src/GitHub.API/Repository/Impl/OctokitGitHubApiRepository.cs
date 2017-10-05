@@ -19,7 +19,7 @@ namespace GitHub.API.Repository.Impl
             try
             {
                 var githubClient = new GitHubClient(new Octokit.ProductHeaderValue("TestingAPI"));
-                githubClient.Credentials = new Credentials("01a9974c28e8ea9e98d2f425b77ff6ff53f26b24");
+                githubClient.Credentials = new Credentials("8927b432e5b232cb08ef7a326c40ed79d6d3b275");
 
 
                 SearchUsersResult users = await githubClient.Search.SearchUsers(new SearchUsersRequest("location:" + location) {

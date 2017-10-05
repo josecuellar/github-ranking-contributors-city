@@ -16,9 +16,10 @@ namespace GitHub.API.Controllers
         }
 
         [HttpGet]
-        public async Task Get()
+        public async Task<string> Get()
         {
             await _service.LoadUsersFromLocationAndPersist("Barcelona");
+            return "Processed OK";
         }
     }
 }
