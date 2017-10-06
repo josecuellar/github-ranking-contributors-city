@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using GitHub.API.Model;
+using Microsoft.Extensions.Caching.Memory;
 using Octokit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using static GitHub.API.Model.LoadStatus;
 
 namespace GitHub.API.Repository.Impl
 {
@@ -12,8 +14,6 @@ namespace GitHub.API.Repository.Impl
     {
 
         private IGitHubApiRepository _repository;
-
-        private IPersistenceLocalDataRepository _persistenceRepository;
 
         private IMemoryCache _memoryCache;
 
@@ -26,16 +26,13 @@ namespace GitHub.API.Repository.Impl
 
         public LoadDataService(
             IGitHubApiRepository repository, 
-            IMemoryCache memoryCache, 
-            IPersistenceLocalDataRepository persistenceRepository)
+            IMemoryCache memoryCache)
         {
             _repository = repository;
             _memoryCache = memoryCache;
-            _persistenceRepository = persistenceRepository;
         }
 
-
-        public async Task LoadUsersFromLocationAndPersist(string location)
+        public async Task LoadUsersFromLocation(string location)
         {
             DateTime dtStart = new DateTime(2008, 4, 1); //Github startup started
 
@@ -48,11 +45,10 @@ namespace GitHub.API.Repository.Impl
                     var result = await _repository.GetUsersWithMoreRepositoriesFromLocation(location, new DateRange(dtStart, dtEnd), 1, _GITHUB_LIMIT_ROWS_PAGE);
 
                     CheckLimitGithubRemaining(result.Key);
-                    Persist(new List<Octokit.User>(result.Value.Items), location);
+                    SetMemory(result.Value.Items, location);
 
                     if (result.Value.TotalCount > _GITHUB_LIMIT_ROWS_PAGE)
                     {
-
                         int numPages = (int)Math.Ceiling((double)result.Value.TotalCount / _GITHUB_LIMIT_ROWS_PAGE);
 
                         for (int i = 2; i <= numPages; i++)
@@ -60,10 +56,12 @@ namespace GitHub.API.Repository.Impl
                             var resultWithPages = await _repository.GetUsersWithMoreRepositoriesFromLocation(location, new DateRange(dtStart, dtEnd), i, _GITHUB_LIMIT_ROWS_PAGE);
 
                             CheckLimitGithubRemaining(result.Key);
-                            Persist(new List<Octokit.User>(resultWithPages.Value.Items), location);
+                            SetMemory(resultWithPages.Value.Items, location);
                         }
-
                     }
+
+                    SetStatus(location, StatusItems.RUNNING, dtEnd);
+
                 }
                 catch (Exception err)
                 {
@@ -74,19 +72,40 @@ namespace GitHub.API.Repository.Impl
                     dtStart = dtStart.AddMonths(_MONTHS_TO_SEARCH_FOR_RANGE_DATE);
                     dtEnd = dtEnd.AddMonths(_MONTHS_TO_SEARCH_FOR_RANGE_DATE);
                 }
+
             }
             while (dtStart <= DateTime.Now);
+
+            SetStatus(location, StatusItems.FINISHED, dtEnd);
+
         }
 
-        private void Persist(List<Octokit.User> users, string location)
+        public LoadStatus GetStatus(string location)
         {
-            //new Thread(() =>
-            //{
-                //Thread.CurrentThread.IsBackground = true;
-                _persistenceRepository.CreateListIfNotExists(users.ConvertAll<Model.User>(item => new Model.User(item.Id, item.Login, location, item.HtmlUrl, 0)));
-            //}).Start();
+            return (_memoryCache.TryGetValue<LoadStatus>("Status" + location, out var toReturn) ? toReturn : new LoadStatus());
+        }
+        public List<Octokit.User> GetDataLoaded(string location)
+        {
+            return (_memoryCache.TryGetValue<List<Octokit.User>>(location, out var toReturn) ? toReturn : new List<User>());
         }
 
+        private void SetMemory(IReadOnlyList<User> users, string location)
+        {
+            if (users == null || (users != null && users.Count == 0))
+                return;
+
+            if (_memoryCache.Get(location) == null)
+                _memoryCache.Set(location, new List<User>());
+
+            if (_memoryCache.TryGetValue<List<User>>(location, out var usersMemory))
+                usersMemory.AddRange(users);
+        }
+
+        private void SetStatus(string location, StatusItems status, DateTime loadedUntil)
+        {
+            _memoryCache.Set("Status" + location, new LoadStatus(loadedUntil, status));
+        }
+        
         private void CheckLimitGithubRemaining(RateLimit limits)
         {
             if (limits.Remaining == 0)

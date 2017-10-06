@@ -1,10 +1,10 @@
-﻿using GitHub.API.Repository;
+﻿using GitHub.API.Model;
+using GitHub.API.Repository;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace GitHub.API.Controllers
 {
-    [Route("api/[controller]")]
     public class UsersController : Controller
     {
 
@@ -16,10 +16,26 @@ namespace GitHub.API.Controllers
         }
 
         [HttpGet]
-        public async Task<string> Get()
+        [Route("api/users/{location}/{top?}")]
+        public UserRankingResult Get(string location)
         {
-            await _service.LoadUsersFromLocationAndPersist("Barcelona");
-            return "Processed OK";
+            if (_service.GetStatus(location).Status == Model.LoadStatus.StatusItems.STOPPED)
+            {
+                new Thread(async () =>
+                {
+                    Thread.CurrentThread.IsBackground = true;
+                    await _service.LoadUsersFromLocation(location);
+                }).Start();
+            }
+
+            var loadStatus = _service.GetStatus(location);
+
+            var dataLoaded = _service.GetDataLoaded(location);
+
+            return new UserRankingResult(
+                (dataLoaded.Count > 100 ? dataLoaded.GetRange(0, 100) : dataLoaded), 
+                (loadStatus.Status == LoadStatus.StatusItems.RUNNING), 
+                loadStatus.LoadedUntil, dataLoaded.Count);
         }
     }
 }

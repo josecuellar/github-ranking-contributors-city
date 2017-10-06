@@ -23,7 +23,6 @@ namespace GitHub.API
             services.AddMemoryCache();
             services.AddTransient<IGitHubApiRepository, OctokitGitHubApiRepository>();
             services.AddTransient<ILoadDataService, LoadDataService>();
-            services.AddTransient<IPersistenceLocalDataRepository, SQLite3PersitenceLocalDataRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

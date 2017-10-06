@@ -1,9 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿using GitHub.API.Model;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GitHub.API.Repository
 {
     public interface ILoadDataService
     {
-        Task LoadUsersFromLocationAndPersist(string location);
+        Task LoadUsersFromLocation(string location);
+
+        LoadStatus GetStatus(string location);
+
+        List<Octokit.User> GetDataLoaded(string location);
     }
 }
