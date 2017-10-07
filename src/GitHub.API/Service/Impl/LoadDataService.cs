@@ -21,6 +21,8 @@ namespace GitHub.API.Repository.Impl
 
         private const int _GITHUB_LIMIT_ROWS_PAGE = 100;
 
+        private const int _GITHUB_LIMIT_SAME_QUERY_TOTAL = 1000;
+
         private const int _MONTHS_TO_SEARCH_FOR_RANGE_DATE = 3;
 
 
@@ -32,20 +34,22 @@ namespace GitHub.API.Repository.Impl
             _memoryCache = memoryCache;
         }
 
-        public async Task LoadUsersFromLocation(string location)
+        public async Task LoadUsersFromLocationByMonthInvertals(string location)
         {
             DateTime dtStart = new DateTime(2008, 4, 1); //Github startup started
-
             DateTime dtEnd = dtStart.AddMonths(_MONTHS_TO_SEARCH_FOR_RANGE_DATE);
 
             do
             {
                 try
                 {
-                    var result = await _repository.GetUsersWithMoreRepositoriesFromLocation(location, new DateRange(dtStart, dtEnd), 1, _GITHUB_LIMIT_ROWS_PAGE);
+                    var dateRange = new DateRange(dtStart, dtEnd);
+
+                    var result = await _repository.GetUsersFromLocationByDateRange(location, dateRange, 1, _GITHUB_LIMIT_ROWS_PAGE);
 
                     CheckLimitGithubRemaining(result.Key);
-                    SetMemory(result.Value.Items, location);
+                    SetData(RankingUser.BuildListFrom(result.Value.Items), location);
+                    SetStatus(location, StatusItems.RUNNING, GetStatus(location).TotalResultsLoaded + result.Value.TotalCount);
 
                     if (result.Value.TotalCount > _GITHUB_LIMIT_ROWS_PAGE)
                     {
@@ -53,14 +57,14 @@ namespace GitHub.API.Repository.Impl
 
                         for (int i = 2; i <= numPages; i++)
                         {
-                            var resultWithPages = await _repository.GetUsersWithMoreRepositoriesFromLocation(location, new DateRange(dtStart, dtEnd), i, _GITHUB_LIMIT_ROWS_PAGE);
+                            var resultWithPages = await _repository.GetUsersFromLocationByDateRange(location, dateRange, i, _GITHUB_LIMIT_ROWS_PAGE);
 
                             CheckLimitGithubRemaining(result.Key);
-                            SetMemory(resultWithPages.Value.Items, location);
+                            SetData(RankingUser.BuildListFrom(resultWithPages.Value.Items), location);
                         }
                     }
 
-                    SetStatus(location, StatusItems.RUNNING, dtEnd);
+                    SetTotalCommits(location);
 
                 }
                 catch (Exception err)
@@ -76,36 +80,88 @@ namespace GitHub.API.Repository.Impl
             }
             while (dtStart <= DateTime.Now);
 
-            SetStatus(location, StatusItems.FINISHED, dtEnd);
+        }
 
+        public async Task LoadUsersFromLocation(string location)
+        {
+            var result = await _repository.GetUsersFromLocation(location, 1, _GITHUB_LIMIT_ROWS_PAGE);
+
+            if (result.Value.TotalCount <= _GITHUB_LIMIT_SAME_QUERY_TOTAL)
+            {
+
+                CheckLimitGithubRemaining(result.Key);
+                SetData(RankingUser.BuildListFrom(result.Value.Items), location);
+
+                int numPages = (int)Math.Ceiling((double)result.Value.TotalCount / _GITHUB_LIMIT_ROWS_PAGE);
+
+                for (int i = 2; i <= numPages; i++)
+                {
+                    var resultWithPages = await _repository.GetUsersFromLocation(location, i, _GITHUB_LIMIT_ROWS_PAGE);
+
+                    CheckLimitGithubRemaining(result.Key);
+                    SetData(RankingUser.BuildListFrom(resultWithPages.Value.Items), location);
+                    SetStatus(location, StatusItems.RUNNING, result.Value.TotalCount);
+                }
+
+                SetTotalCommits(location);
+
+                SetStatus(location, StatusItems.FINISHED, result.Value.TotalCount, result.Value.TotalCount);
+
+                return;
+            }
+
+            await LoadUsersFromLocationByMonthInvertals(location);
         }
 
         public LoadStatus GetStatus(string location)
         {
-            return (_memoryCache.TryGetValue<LoadStatus>("Status" + location, out var toReturn) ? toReturn : new LoadStatus());
-        }
-        public List<Octokit.User> GetDataLoaded(string location)
-        {
-            return (_memoryCache.TryGetValue<List<Octokit.User>>(location, out var toReturn) ? toReturn : new List<User>());
+            if (!_memoryCache.TryGetValue<LoadStatus>("Status" + location, out var toReturn))
+                _memoryCache.Set("Status" + location, new LoadStatus());
+
+            return _memoryCache.Get<LoadStatus>("Status" + location);
         }
 
-        private void SetMemory(IReadOnlyList<User> users, string location)
+        public void SetStatus(string location, StatusItems status, long totalResultsLoaded, long totalResults)
+        {
+            GetStatus(location).Status = status;
+            GetStatus(location).TotalResults = totalResults;
+            GetStatus(location).TotalResultsLoaded = totalResultsLoaded;
+        }
+
+        public void SetStatus(string location, StatusItems status, long totalResultsLoaded)
+        {
+            GetStatus(location).Status = status;
+            GetStatus(location).TotalResultsLoaded = totalResultsLoaded;
+        }
+
+        public List<RankingUser> GetDataLoaded(string location)
+        {
+            List<RankingUser> dataLoaded = (_memoryCache.TryGetValue<List<RankingUser>>(location, out var toReturn) ? toReturn : new List<RankingUser>());
+            return new List<RankingUser>(dataLoaded);
+        }
+
+        private void SetData(IReadOnlyList<RankingUser> users, string location)
         {
             if (users == null || (users != null && users.Count == 0))
                 return;
 
             if (_memoryCache.Get(location) == null)
-                _memoryCache.Set(location, new List<User>());
+                _memoryCache.Set(location, new List<RankingUser>());
 
-            if (_memoryCache.TryGetValue<List<User>>(location, out var usersMemory))
+            if (_memoryCache.TryGetValue<List<RankingUser>>(location, out var usersMemory))
                 usersMemory.AddRange(users);
         }
 
-        private void SetStatus(string location, StatusItems status, DateTime loadedUntil)
+        private List<RankingUser> GetDataLoadedMutable(string location)
         {
-            _memoryCache.Set("Status" + location, new LoadStatus(loadedUntil, status));
+            return (_memoryCache.TryGetValue<List<RankingUser>>(location, out var toReturn) ? toReturn : new List<RankingUser>());
         }
-        
+
+        private void SetTotalCommits(string location)
+        {
+            GetDataLoadedMutable(location).ForEach(async x => x.TotalCommits = await _repository.GetTotalCommitsByUser(x.UserName));
+        }
+
         private void CheckLimitGithubRemaining(RateLimit limits)
         {
             if (limits.Remaining == 0)

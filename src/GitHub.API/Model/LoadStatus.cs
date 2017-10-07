@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace GitHub.API.Model
 {
     public class LoadStatus
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum StatusItems
         {
             FINISHED,
@@ -11,20 +13,23 @@ namespace GitHub.API.Model
             STOPPED
         }
 
-        public DateTime LoadedUntil { get; private set; }
+        public long TotalResults { get; set; }
 
-        public StatusItems Status { get; private set; }
+        public long TotalResultsLoaded { get; set; }
 
-        public LoadStatus(DateTime loadedUntil, StatusItems status)
+        public StatusItems Status { get; set; }
+
+        public LoadStatus(long totalResults, long totalResultsLoaded, StatusItems status)
         {
-            LoadedUntil = loadedUntil;
             Status = status;
+            TotalResults = TotalResults;
+            TotalResultsLoaded = totalResultsLoaded;
         }
-
         public LoadStatus()
         {
-            LoadedUntil = DateTime.MinValue;
-            Status =  StatusItems.STOPPED;
+            Status = StatusItems.STOPPED;
+            TotalResults = 0;
+            TotalResultsLoaded = 0;
         }
     }
 }
