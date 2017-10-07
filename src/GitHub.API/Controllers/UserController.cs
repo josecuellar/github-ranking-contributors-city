@@ -1,9 +1,7 @@
 ﻿using GitHub.API.Model;
 using GitHub.API.Repository;
+using GitHub.API.Service;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace GitHub.API.Controllers
@@ -12,10 +10,16 @@ namespace GitHub.API.Controllers
     {
 
         private ILoadDataService _service;
+        private IStatusLoadDataService _serviceStatus;
+        private ILoadDataRepository _repository;
 
-        public UsersController(ILoadDataService service)
+        public UsersController(ILoadDataService service, 
+            IStatusLoadDataService serviceStatus,
+            ILoadDataRepository repository)
         {
             _service = service;
+            _serviceStatus = serviceStatus;
+            _repository = repository;
         }
 
         [HttpGet]
@@ -28,7 +32,7 @@ namespace GitHub.API.Controllers
             if (top > 150)
                 return BadRequest("max value for top is 150");
 
-            if (_service.GetStatus(location).Status == Model.LoadStatus.StatusItems.STOPPED)
+            if (_serviceStatus.GetStatus(location).Status == Model.LoadStatus.StatusItems.STOPPED)
             {
                 //new Thread(async () =>
                 //{
@@ -37,8 +41,9 @@ namespace GitHub.API.Controllers
                 //}).Start();
             }
 
-            var loadStatus = _service.GetStatus(location);
-            var dataLoaded = _service.GetDataLoaded(location);
+            var loadStatus = _serviceStatus.GetStatus(location);
+
+            var dataLoaded = _repository.GetDataLoaded(location);
 
             return Ok(new UserRankingResult(dataLoaded, loadStatus, top));
             

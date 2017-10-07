@@ -1,5 +1,7 @@
 ﻿using GitHub.API.Repository;
 using GitHub.API.Repository.Impl;
+using GitHub.API.Service;
+using GitHub.API.Service.Impl;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +25,7 @@ namespace GitHub.API
             services.AddMemoryCache();
             services.AddTransient<IGitHubApiRepository, OctokitGitHubApiRepository>();
             services.AddTransient<ILoadDataService, LoadDataService>();
+            services.AddTransient<IStatusLoadDataService, StatusLoadDataService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
