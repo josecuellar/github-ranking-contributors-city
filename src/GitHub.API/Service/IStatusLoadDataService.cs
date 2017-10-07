@@ -10,8 +10,14 @@ namespace GitHub.API.Service
     {
         LoadStatus GetStatus(string location);
 
-        void SetStatus(string location, StatusItems status, long totalResultsLoaded, long totalResults);
+        void AddLoaded(string location, long loaded);
 
-        void SetStatus(string location, StatusItems status, long totalResultsLoaded);
+        void SetRunning(string location, long total);
+
+        void SetRunning(string location);
+
+        void SetFinished(string location, long total);
+
+        void SetCalculatingOrder(string location);
     }
 }

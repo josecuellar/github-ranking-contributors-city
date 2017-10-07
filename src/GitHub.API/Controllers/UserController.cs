@@ -2,6 +2,7 @@
 using GitHub.API.Repository;
 using GitHub.API.Service;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GitHub.API.Controllers
@@ -33,19 +34,13 @@ namespace GitHub.API.Controllers
                 return BadRequest("max value for top is 150");
 
             if (_serviceStatus.GetStatus(location).Status == Model.LoadStatus.StatusItems.STOPPED)
-            {
-                //new Thread(async () =>
-                //{
-                    //Thread.CurrentThread.IsBackground = true;
-                    await _service.LoadUsersFromLocation(location);
-                //}).Start();
-            }
-
+                await _service.LoadUsersFromLocation(location);
+            
             var loadStatus = _serviceStatus.GetStatus(location);
 
-            var dataLoaded = _repository.GetDataLoaded(location);
+            var dataLoaded = _repository.GetDataLoadedOrderedByReposAndCommits(location, top);
 
-            return Ok(new UserRankingResult(dataLoaded, loadStatus, top));
+            return Ok(new UserRankingResult(dataLoaded, loadStatus));
             
         }
     }

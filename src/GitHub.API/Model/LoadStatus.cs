@@ -10,6 +10,7 @@ namespace GitHub.API.Model
         {
             FINISHED,
             RUNNING,
+            CALCULATING_ORDER,
             STOPPED
         }
 

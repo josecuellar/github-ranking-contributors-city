@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace GitHub.API.Model
 {
@@ -8,11 +9,8 @@ namespace GitHub.API.Model
 
         public List<RankingUser> Users { get; private set; }
 
-        public UserRankingResult(List<RankingUser> users, LoadStatus status, int topResults)
+        public UserRankingResult(List<RankingUser> users, LoadStatus status)
         {
-            if (users.Count > topResults)
-                users = users.GetRange(0, topResults);
-
             Users = users;
             Status = status;
         }

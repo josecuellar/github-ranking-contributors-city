@@ -1,33 +1,34 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace GitHub.API.Model
 {
     public class RankingUser 
     {
-        private static long order = 0;
+        public string UserName { get; private set; }
 
-        public long Order { get; set; }
+        public string Url { get; private set; }
 
-        public long TotalCommits { get; set; }
+        public int Repositories { get; private set; }
 
-        public string UserName { get; set; }
+        public int Commits { get; set; }
 
-        public string Url { get; set; }
-
-        public string Location { get; set; }
-
-        public RankingUser(long totalCommits, string userName, string url, string location) 
+        public RankingUser(string userName, string url, int repositories) 
         {
-            TotalCommits = totalCommits;
             UserName = userName;
             Url = url;
-            Order = order++;
-            Location = location;
+            Repositories = repositories;
+            Commits = 0;
         }
 
-        public static IReadOnlyList<RankingUser> BuildListFrom(IReadOnlyList<Octokit.User> baseUsers)
+        public void SetCommits(int commits)
         {
-            return new List<RankingUser>(new List<Octokit.User>(baseUsers).ConvertAll(x => new RankingUser(0, x.Login, x.HtmlUrl, x.Location)));
+            Commits = commits;
+        }
+
+        public static List<RankingUser> BuildListFrom(IReadOnlyList<Octokit.User> users)
+        {
+            return new List<RankingUser>(new List<Octokit.User>(users).ConvertAll(x => new RankingUser(x.Login, x.HtmlUrl, x.TotalPrivateRepos)));
         }
     }
 }

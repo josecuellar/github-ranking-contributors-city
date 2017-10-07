@@ -1,6 +1,7 @@
 ﻿using GitHub.API.Model;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GitHub.API.Repository.Impl
 {
@@ -16,13 +17,20 @@ namespace GitHub.API.Repository.Impl
 
         public List<RankingUser> GetDataLoaded(string location)
         {
-            List<RankingUser> dataLoaded = (_memoryCache.TryGetValue<List<RankingUser>>(location, out var toReturn) ? toReturn : new List<RankingUser>());
-            return new List<RankingUser>(dataLoaded);
+            return (_memoryCache.TryGetValue<List<RankingUser>>(location, out var toReturn) ? toReturn : new List<RankingUser>());
         }
 
-        public List<RankingUser> GetDataLoadedMutable(string location)
+        public List<RankingUser> GetDataLoadedOrderedByReposAndCommits(string location, int topResults)
         {
-            return (_memoryCache.TryGetValue<List<RankingUser>>(location, out var toReturn) ? toReturn : new List<RankingUser>());
+            var users = new List<RankingUser>(GetDataLoaded(location))
+                .OrderByDescending(x => x.Commits)
+                .ThenByDescending(x => x.Repositories)
+                .ToList();
+
+            if (users.Count > topResults)
+                users = users.GetRange(0, topResults);
+
+            return users;
         }
 
         public void SetData(IReadOnlyList<RankingUser> users, string location)

@@ -26,6 +26,7 @@ namespace GitHub.API
             services.AddTransient<IGitHubApiRepository, OctokitGitHubApiRepository>();
             services.AddTransient<ILoadDataService, LoadDataService>();
             services.AddTransient<IStatusLoadDataService, StatusLoadDataService>();
+            services.AddTransient<ILoadDataRepository, LoadDataRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

@@ -23,19 +23,39 @@ namespace GitHub.API.Service.Impl
             return _memoryCache.Get<LoadStatus>("Status" + location);
         }
 
-        public void SetStatus(string location, StatusItems status, long totalResultsLoaded, long totalResults)
+        public void AddLoaded(string location, long loaded)
         {
             var currentStatus = GetStatus(location);
-            currentStatus.Status = status;
-            currentStatus.TotalResults = totalResults;
-            currentStatus.TotalResultsLoaded = totalResultsLoaded;
+            var totalLoaded = (currentStatus.TotalResultsLoaded + loaded); 
+            currentStatus.TotalResultsLoaded = (totalLoaded > currentStatus.TotalResults ? currentStatus.TotalResults : totalLoaded); //;P
         }
 
-        public void SetStatus(string location, StatusItems status, long totalResultsLoaded)
+        public void SetRunning(string location, long total)
         {
             var currentStatus = GetStatus(location);
-            currentStatus.Status = status;
-            currentStatus.TotalResultsLoaded = totalResultsLoaded;
+            currentStatus.TotalResults = total;
+            currentStatus.Status = StatusItems.RUNNING;
         }
+
+        public void SetRunning(string location)
+        {
+            var currentStatus = GetStatus(location);
+            currentStatus.Status = StatusItems.RUNNING;
+        }
+
+        public void SetCalculatingOrder(string location)
+        {
+            var currentStatus = GetStatus(location);
+            currentStatus.Status = StatusItems.CALCULATING_ORDER;
+        }
+
+        public void SetFinished(string location, long total)
+        {
+            var currentStatus = GetStatus(location);
+            currentStatus.TotalResults = total;
+            currentStatus.TotalResultsLoaded = total;
+            currentStatus.Status = StatusItems.FINISHED;
+        }
+
     }
 }
