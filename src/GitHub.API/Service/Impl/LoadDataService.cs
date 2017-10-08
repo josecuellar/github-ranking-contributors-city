@@ -12,11 +12,11 @@ namespace GitHub.API.Service.Impl
     public class LoadDataService : ILoadDataService
     {
 
-        private IGitHubApiRepository _repository;
+        private IGitHubApiProvider _provider;
 
-        private IStatusLoadDataService _statusService;
+        private IStatusRepository _statusService;
 
-        private ILoadDataRepository _loadDataRepository;
+        private IRepository _loadDataRepository;
 
         private const int _GITHUB_LIMIT_ROWS_PAGE = 100;
 
@@ -26,17 +26,20 @@ namespace GitHub.API.Service.Impl
 
 
         public LoadDataService(
-            IGitHubApiRepository repository,
-            IStatusLoadDataService statusService,
-            ILoadDataRepository loadDataRepository)
+            IGitHubApiProvider provider,
+            IStatusRepository statusService,
+            IRepository loadDataRepository)
         {
-            _repository = repository;
+            _provider = provider;
             _loadDataRepository = loadDataRepository;
             _statusService = statusService;
         }
 
         public async Task LoadUsersFromLocationByMonthInvertals(string location)
         {
+            if (string.IsNullOrEmpty(location))
+                throw new ArgumentNullException("location is mandatory");
+
             DateTime dtStart = new DateTime(2008, 4, 1); //Github startup started
             DateTime dtEnd = dtStart.AddMonths(_MONTHS_TO_SEARCH_FOR_RANGE_DATE);
 
@@ -46,25 +49,24 @@ namespace GitHub.API.Service.Impl
                 {
                     var dateRange = new DateRange(dtStart, dtEnd);
 
-                    var result = await _repository.GetUsersFromLocationByDateRange(location, dateRange, 1, _GITHUB_LIMIT_ROWS_PAGE);
+                    var result = await _provider.GetUsersFrom(location, dateRange, 1, _GITHUB_LIMIT_ROWS_PAGE);
 
                     var dataToSave = new List<User>(result.Items);
-
-                    _statusService.AddLoaded(location, result.TotalCount);
 
                     if (HaveMoreThanOnePage(result.TotalCount))
                     {
                         for (int i = 2; i <= GetNumPages(result.TotalCount); i++)
                         {
-                            var resultWithPages = await _repository.GetUsersFromLocationByDateRange(location, dateRange, i, _GITHUB_LIMIT_ROWS_PAGE);
+                            var resultWithPages = await _provider.GetUsersFrom(location, dateRange, i, _GITHUB_LIMIT_ROWS_PAGE);
 
                             dataToSave.AddRange(resultWithPages.Items);
-
-                            _statusService.AddLoaded(location, resultWithPages.TotalCount);
                         }
                     }
 
-                    _loadDataRepository.SetData(RankingUser.BuildListFrom(dataToSave), location);
+                    var concurrentDict = RankingUser.BuildConcurrentDictionaryFrom(dataToSave);
+                    _loadDataRepository.Set(concurrentDict, location);
+                    _statusService.AddLoaded(location, concurrentDict.Count);
+
                 }
                 catch (Exception err)
                 {
@@ -77,34 +79,33 @@ namespace GitHub.API.Service.Impl
                 }
             }
             while (dtStart <= DateTime.Now);
-
-            _statusService.SetCalculatingOrder(location);
-
-            await SetCommits(location);
         }
 
         public async Task LoadUsersFromLocation(string location)
         {
-            var result = await _repository.GetUsersFromLocation(location, 1, _GITHUB_LIMIT_ROWS_PAGE);
+            if (string.IsNullOrEmpty(location))
+                throw new ArgumentNullException("location is mandatory");
+
+            var result = await _provider.GetUsersFrom(location, 1, _GITHUB_LIMIT_ROWS_PAGE);
 
             _statusService.SetRunning(location, result.TotalCount);
 
             if (CanUseTheSameQueryForAllResults(result.TotalCount))
             {
-                _statusService.AddLoaded(location, result.TotalCount);
-
                 var dataToSave = new List<User>(result.Items);
 
                 if (HaveMoreThanOnePage(result.TotalCount))
                 {
                     for (int i = 2; i <= GetNumPages(result.TotalCount); i++)
                     {
-                        var resultWithPages = await _repository.GetUsersFromLocation(location, i, _GITHUB_LIMIT_ROWS_PAGE);
+                        var resultWithPages = await _provider.GetUsersFrom(location, i, _GITHUB_LIMIT_ROWS_PAGE);
                         dataToSave.AddRange(resultWithPages.Items);
                     }
                 }
 
-                _loadDataRepository.SetData(RankingUser.BuildListFrom(dataToSave), location);
+                var concurrentDict = RankingUser.BuildConcurrentDictionaryFrom(dataToSave);
+                _loadDataRepository.Set(concurrentDict, location);
+                _statusService.AddLoaded(location, concurrentDict.Count);
 
                 _statusService.SetCalculatingOrder(location);
 
@@ -112,7 +113,7 @@ namespace GitHub.API.Service.Impl
                 {
                     Thread.CurrentThread.IsBackground = true;
 
-                    await SetCommits(location);
+                    await SetAllReposAndCommits(location);
 
                     _statusService.SetFinished(location, result.TotalCount);
 
@@ -128,15 +129,28 @@ namespace GitHub.API.Service.Impl
 
                 await LoadUsersFromLocationByMonthInvertals(location);
 
+                _statusService.SetCalculatingOrder(location);
+
+                await SetAllReposAndCommits(location);
+
                 _statusService.SetFinished(location, result.TotalCount);
 
             }).Start();
         }
 
-        private async Task SetCommits(string location)
+        private async Task SetAllReposAndCommits(string location)
         {
-            foreach (RankingUser user in _loadDataRepository.GetDataLoaded(location))
-                user.SetCommits(await _repository.GetTotalCommitsByUser(user.UserName));
+            if (string.IsNullOrEmpty(location))
+                throw new ArgumentNullException("location is mandatory");
+
+            foreach (string user in _loadDataRepository.Get(location).Keys)
+            {
+                var totalCommits = await _provider.GetTotalCommitsByUser(user);
+                var totalRepos = await _provider.GetTotalRepositoriesByUser(user);
+
+                _loadDataRepository.SetReposAndCommitsToUser(location, user, totalCommits, totalRepos);
+                _statusService.SetOrderCalculated(location);
+            }
         }
 
         private int GetNumPages(double total)

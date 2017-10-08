@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System;
 
 namespace GitHub.API.Model
 {
@@ -17,6 +18,12 @@ namespace GitHub.API.Model
         public long TotalResults { get; set; }
 
         public long TotalResultsLoaded { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public DateTime? LastUpdated { get; set; } = null;
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int? TotalOrderCalculated { get; set; } = null;
 
         public StatusItems Status { get; set; }
 

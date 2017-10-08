@@ -3,15 +3,16 @@ using Octokit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GitHub.API.Repository.Impl
+namespace GitHub.API.Service.Impl
 {
-    public class OctokitGitHubApiRepository : IGitHubApiRepository
+    public class OctokitGitHubApiProvider : IGitHubApiProvider
     {
 
-        private const string _ACCESS_TOKEN = "67a32f27b93bc0cdd3150fc212fc956e82e8ad24";
+        private const string _ACCESS_TOKEN = "8c02f531b445aa629db2efd8e03ad35e4f638941";
 
         private int _MILLISECONDS_WAIT_FOR_AVOID_LIMIT = 60000; //Limit 1 minute per 30 requestsresult
 
@@ -31,10 +32,22 @@ namespace GitHub.API.Repository.Impl
 
         //The Search API has a custom rate limit.For requests using Basic Authentication, OAuth, or client ID and secret, you can make up to 30 requests per minute.
         //Get by date range for avoid limit of 1000 results for with the same filters
-        public async Task<SearchUsersResult> GetUsersFromLocationByDateRange(string location, DateRange dateRange, int page, int rows)
+        public async Task<SearchUsersResult> GetUsersFrom(string location, DateRange dateRange, int page, int rows)
         {
             try
             {
+                if (string.IsNullOrEmpty(location))
+                    throw (new ArgumentNullException("userName is mandatory"));
+
+                if (page <= 0)
+                    throw (new ArgumentNullException("page not valid"));
+
+                if (rows <= 0)
+                    throw (new ArgumentNullException("rows not valid"));
+
+                if (dateRange == null)
+                    throw (new ArgumentNullException("dateRange not valid"));
+
                 SearchUsersResult users = await GetClient.Search.SearchUsers(new SearchUsersRequest("location:" + location)
                 {
                     Order = SortDirection.Descending,
@@ -51,20 +64,37 @@ namespace GitHub.API.Repository.Impl
                 if (rateLimit.Remaining == 0)
                     WaitForLimitRequestsPerMinute();
 
+                Debug.WriteLine(string.Format("query: location {0}, page {1}, rows{2}, date range {3} ", location, page, rows, dateRange));
+                Debug.WriteLine("returned " + users.Items.Count);
+
                 return users;
+            }
+            catch (RateLimitExceededException limit)
+            {
+                WaitForLimitRequestsPerMinute();
+                return await GetUsersFrom(location, dateRange, page, rows);
             }
             catch (Exception err)
             {
-                Debug.Print(err.Message);
+                Debug.WriteLine(err.Message);
                 return new SearchUsersResult();
             }
 
         }
 
-        public async Task<SearchUsersResult> GetUsersFromLocation(string location, int page, int rows)
+        public async Task<SearchUsersResult> GetUsersFrom(string location, int page, int rows)
         {
             try
             {
+                if (string.IsNullOrEmpty(location))
+                    throw (new ArgumentNullException("userName is mandatory"));
+
+                if (page <= 0)
+                    throw (new ArgumentNullException("page not valid"));
+
+                if (rows <= 0)
+                    throw (new ArgumentNullException("rows not valid"));
+
                 SearchUsersResult users = await GetClient.Search.SearchUsers(new SearchUsersRequest("location:" + location)
                 {
                     Order = SortDirection.Descending,
@@ -80,21 +110,32 @@ namespace GitHub.API.Repository.Impl
                 if (rateLimit.Remaining == 0)
                     WaitForLimitRequestsPerMinute();
 
+                Debug.WriteLine(string.Format("query: location {0}, page {1}, rows{2}", location, page, rows));
+                Debug.WriteLine("returned " + users.Items.Count);
+
                 return users;
+            }
+            catch (RateLimitExceededException limit)
+            {
+                WaitForLimitRequestsPerMinute();
+                return await GetUsersFrom(location, page, rows);
             }
             catch (Exception err)
             {
-                Debug.Print(err.Message);
+                Debug.WriteLine(err.Message);
                 return new SearchUsersResult();
             }
         }
 
-        public async Task<int> GetTotalCommitsByUser(string login)
+        public async Task<int> GetTotalCommitsByUser(string userName)
         {
             try
             {
+                if (string.IsNullOrEmpty(userName))
+                    throw (new ArgumentNullException("userName is mandatory"));
+
                 var result = await GetClient.Connection.Get<dynamic>(
-                    new Uri("https://api.github.com/search/commits?q=author-name:" + login), 
+                    new Uri("https://api.github.com/search/commits?q=merge:false+author:" + userName), 
                     new Dictionary<string, string>(), 
                     "application/vnd.github.cloak-preview");
 
@@ -113,16 +154,50 @@ namespace GitHub.API.Repository.Impl
 
                 return 0;
             }
+            catch(RateLimitExceededException limit)
+            {
+                WaitForLimitRequestsPerMinute();
+                return await GetTotalCommitsByUser(userName);
+            }
             catch (Exception err)
             {
-                Debug.Print(err.Message);
+                Debug.WriteLine(err.Message);
+                return 0;
+            }
+        }
+
+        public async Task<int> GetTotalRepositoriesByUser(string userName)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userName))
+                    throw (new ArgumentNullException("userName is mandatory"));
+
+                var result = await GetClient.User.Get(userName);
+
+                var apiInfo = GetClient.Connection.GetLastApiInfo();
+                var rateLimit = apiInfo?.RateLimit;
+
+                if (rateLimit.Remaining == 0)
+                    WaitForLimitRequestsPerMinute();
+
+                return (result.PublicRepos + result.OwnedPrivateRepos + result.TotalPrivateRepos);
+            }
+            catch (RateLimitExceededException limit)
+            {
+                WaitForLimitRequestsPerMinute();
+                return await GetTotalCommitsByUser(userName);
+            }
+            catch (Exception err)
+            {
+                Debug.WriteLine(err.Message);
                 return 0;
             }
         }
 
         private void WaitForLimitRequestsPerMinute()
         {
-            Debug.Print("----- waitting a minute :( -----");
+            Debug.WriteLine("----- waitting a minute :( -----");
             Thread.Sleep(_MILLISECONDS_WAIT_FOR_AVOID_LIMIT);
         }
     }

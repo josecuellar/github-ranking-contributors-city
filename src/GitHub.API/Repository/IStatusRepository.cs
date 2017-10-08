@@ -4,15 +4,17 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using static GitHub.API.Model.LoadStatus;
 
-namespace GitHub.API.Service
+namespace GitHub.API.Repository
 {
-    public interface IStatusLoadDataService
+    public interface IStatusRepository
     {
-        LoadStatus GetStatus(string location);
+        LoadStatus Get(string location);
 
         void AddLoaded(string location, long loaded);
 
         void SetRunning(string location, long total);
+
+        void SetOrderCalculated(string location);
 
         void SetRunning(string location);
 
