@@ -7,7 +7,7 @@ Given a <b>city name</b> (<i>e.g. Barcelona</i>) the service returns a list of t
 The service should give the possibility to choose between the Top 50, Top 100 or Top
 150 contributors</p>
 
-<h4>GitHub API Limits (using personal API tokens)</h4>
+<h3>GitHub API Limits (using personal API tokens)</h3>
 <ul>
     <li>30 requests minute for authorized user</li>
     <li>1.000 total results for search (with the same filters paged)</li>
@@ -17,7 +17,7 @@ The service should give the possibility to choose between the Top 50, Top 100 or
 
 <hr>
 
-<h4>Solution</h4>
+<h3>Solution</h3>
 
 <b>Technologies</b>
 
@@ -30,7 +30,7 @@ The service should give the possibility to choose between the Top 50, Top 100 or
 
 You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a> with <a href="https://github.com/OmniSharp/omnisharp-vscode">OmniSharp extension</a> for support for <b>C# 7.1 & .NET Core 2</b>.
 
-<b>Using API method (valid endpoints)</b>
+<h3>API method (endpoints examples)</h3>
 
 <p>
     api/user/<b>Valencia</b>/<i>50</i><br>
@@ -38,7 +38,7 @@ You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a>
     api/user/<b>Tarragona</b>/<i>150</i><br>
 </p>    
 
-<h4>Response</h4>
+<h3>Response</h3>
 
  <ul>
     <li> 
@@ -59,13 +59,13 @@ You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a>
 
 <br><br>
 
-<b>Cache & Repository </b><br><br>
+<h3>Cache & Repository </h3><br><br>
 <p>The first MVP use process caching for store all necessary information and sort list in memory. All code is decouple with interfaces (interface segregation principle). Now is very easly implement any other distributed caching technology like Redis (Open/Close principle).</p>
 <br><br>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/implmemory.jpg">
 <br><br>
 
-<b>Next steps</b>
+<h3>Next steps</h3>
 <br><br>
 
  <ul>
@@ -77,13 +77,13 @@ You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a>
 
 <br><br>
 
-<b>SNAPSHOT Running Status</b><br><br>
+<h3>SNAPSHOT Running Status</h3><br><br>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/running2.jpg">
 
-<b>SNAPSHOT Calculating Order Status</b><br><br>
+<h3>SNAPSHOT Calculating Order Status</h3><br><br>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/calculatingorder.jpg">
 
-<b>SNAPSHOT Finished Status</b><br><br>
+<h3>SNAPSHOT Finished Status</h3><br><br>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/finished.jpg">
 
 </body>
