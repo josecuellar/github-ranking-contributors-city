@@ -11,7 +11,7 @@ namespace GitHub.API.Repository
 
         List<RankingUser> GetOrderedByReposAndCommits(string location, int topResults);
 
-        void Set(ConcurrentDictionary<string, RankingUser> users, string location);
+        int Set(ConcurrentDictionary<string, RankingUser> users, string location);
 
         void SetReposAndCommitsToUser(string location, string userName, int commits, int repositories);
     }

@@ -35,6 +35,7 @@ namespace GitHub.API.Service.Impl
             _statusService = statusService;
         }
 
+
         public async Task LoadUsersFromLocationByMonthInvertals(string location)
         {
             if (string.IsNullOrEmpty(location))
@@ -50,23 +51,10 @@ namespace GitHub.API.Service.Impl
                     var dateRange = new DateRange(dtStart, dtEnd);
 
                     var result = await _provider.GetUsersFrom(location, dateRange, 1, GITHUB_LIMIT_ROWS_PAGE);
-
-                    var dataToSave = new List<User>(result.Items);
+                    SetResults(result.Items, location);
 
                     if (HaveMoreThanOnePage(result.TotalCount))
-                    {
-                        for (int i = 2; i <= GetNumPages(result.TotalCount); i++)
-                        {
-                            var resultWithPages = await _provider.GetUsersFrom(location, dateRange, i, GITHUB_LIMIT_ROWS_PAGE);
-
-                            dataToSave.AddRange(resultWithPages.Items);
-                        }
-                    }
-
-                    var concurrentDict = RankingUser.BuildConcurrentDictionaryFrom(dataToSave);
-                    _loadDataRepository.Set(concurrentDict, location);
-                    _statusService.AddLoaded(location, concurrentDict.Count);
-
+                        FireParallelLoopPages(GetNumPages(result.TotalCount), location, dateRange);
                 }
                 catch (Exception err)
                 {
@@ -92,20 +80,10 @@ namespace GitHub.API.Service.Impl
 
             if (CanUseTheSameQueryForAllResults(result.TotalCount))
             {
-                var dataToSave = new List<User>(result.Items);
+                SetResults(result.Items, location);
 
                 if (HaveMoreThanOnePage(result.TotalCount))
-                {
-                    for (int i = 2; i <= GetNumPages(result.TotalCount); i++)
-                    {
-                        var resultWithPages = await _provider.GetUsersFrom(location, i, GITHUB_LIMIT_ROWS_PAGE);
-                        dataToSave.AddRange(resultWithPages.Items);
-                    }
-                }
-
-                var concurrentDict = RankingUser.BuildConcurrentDictionaryFrom(dataToSave);
-                _loadDataRepository.Set(concurrentDict, location);
-                _statusService.AddLoaded(location, concurrentDict.Count);
+                    FireParallelLoopPages(GetNumPages(result.TotalCount), location);
 
                 _statusService.SetCalculatingOrder(location);
 
@@ -166,6 +144,38 @@ namespace GitHub.API.Service.Impl
         private bool HaveMoreThanOnePage(int total)
         {
             return (total > GITHUB_LIMIT_ROWS_PAGE);
+        }
+
+        private void SetResults(IReadOnlyList<User> users, string location)
+        {
+            var concurrentDict = RankingUser.BuildConcurrentDictionaryFrom(users);
+            _statusService.AddLoaded(location, _loadDataRepository.Set(concurrentDict, location));
+        }
+
+        private void FireParallelLoopPages(int numPages, string location, DateRange dateRange)
+        {
+            Parallel.For(2,
+                numPages,
+                new ParallelOptions { MaxDegreeOfParallelism = 100 },
+                async numberPage =>
+                {
+                    var resultWithPages = await _provider.GetUsersFrom(location, dateRange, numberPage, GITHUB_LIMIT_ROWS_PAGE);
+                    SetResults(resultWithPages.Items, location);
+                }
+            );
+        }
+
+        private void FireParallelLoopPages(int numPages, string location)
+        {
+            Parallel.For(2,
+                numPages,
+                new ParallelOptions { MaxDegreeOfParallelism = 100 },
+                async numberPage =>
+                {
+                    var resultWithPages = await _provider.GetUsersFrom(location, numberPage, GITHUB_LIMIT_ROWS_PAGE);
+                    SetResults(resultWithPages.Items, location);
+                }
+            );
         }
     }
 }

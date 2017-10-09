@@ -58,7 +58,7 @@ namespace GitHub.API.Repository.Impl.InMemory
             }
         }
 
-        public void Set(ConcurrentDictionary<string, RankingUser> users, string location)
+        public int Set(ConcurrentDictionary<string, RankingUser> users, string location)
         {
             if (string.IsNullOrEmpty(location))
                 throw new ArgumentNullException("location is mandatory");
@@ -66,13 +66,18 @@ namespace GitHub.API.Repository.Impl.InMemory
             if (users == null || (users != null && users.Count == 0))
             {
                 Debug.WriteLine("setData with no results:" + location);
-                return;
+                return 0;
             }
 
             var usersMemory = _memoryCache.GetOrCreate(location, x => new ConcurrentDictionary<string, RankingUser>());
 
+            int added = 0;
             foreach (var user in users)
-                usersMemory.TryAdd(user.Key, user.Value);
+            {
+                if (usersMemory.TryAdd(user.Key, user.Value))
+                    added++;
+            }
+            return added;
         }
 
         public void SetReposAndCommitsToUser(string location, string userName, int commits, int repositories)
