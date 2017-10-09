@@ -3,7 +3,6 @@ using Octokit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,9 +11,9 @@ namespace GitHub.API.Service.Impl
     public class OctokitGitHubApiProvider : IGitHubApiProvider
     {
 
-        private const string _ACCESS_TOKEN = "8c02f531b445aa629db2efd8e03ad35e4f638941";
+        private const string ACCESS_TOKEN = "8c02f531b445aa629db2efd8e03ad35e4f638941";
 
-        private int _MILLISECONDS_WAIT_FOR_AVOID_LIMIT = 60000; //Limit 1 minute per 30 requestsresult
+        private int MILLISECONDS_WAIT_FOR_AVOID_LIMIT = 60000; //Limit 1 minute per 30 requestsresult
 
         private static GitHubClient _client = null;
         private static GitHubClient GetClient
@@ -24,13 +23,13 @@ namespace GitHub.API.Service.Impl
                 if (_client == null)
                 {
                     _client = new GitHubClient(new Octokit.ProductHeaderValue("TestingAPI"));
-                    _client.Credentials = new Credentials(_ACCESS_TOKEN);
+                    _client.Credentials = new Credentials(ACCESS_TOKEN);
                 }                   
                 return _client;
             }
         }
 
-        //The Search API has a custom rate limit.For requests using Basic Authentication, OAuth, or client ID and secret, you can make up to 30 requests per minute.
+        //The Search API has a custom rate limit. For requests using Basic Authentication, OAuth, or client ID and secret, you can make up to 30 requests per minute.
         //Get by date range for avoid limit of 1000 results for with the same filters
         public async Task<SearchUsersResult> GetUsersFrom(string location, DateRange dateRange, int page, int rows)
         {
@@ -53,6 +52,7 @@ namespace GitHub.API.Service.Impl
                     Order = SortDirection.Descending,
                     SortField = UsersSearchSort.Repositories,
                     AccountType = AccountSearchType.User,
+                    Repositories = new Range(1, int.MaxValue),
                     PerPage = rows,
                     Created = dateRange,
                     Page = page
@@ -100,6 +100,7 @@ namespace GitHub.API.Service.Impl
                     Order = SortDirection.Descending,
                     SortField = UsersSearchSort.Repositories,
                     AccountType = AccountSearchType.User,
+                    Repositories = new Range(1, int.MaxValue),
                     PerPage = rows,
                     Page = page
                 });
@@ -110,13 +111,14 @@ namespace GitHub.API.Service.Impl
                 if (rateLimit.Remaining == 0)
                     WaitForLimitRequestsPerMinute();
 
-                Debug.WriteLine(string.Format("query: location {0}, page {1}, rows{2}", location, page, rows));
+                Debug.WriteLine(string.Format("query: location {0}, page {1}, rows {2}", location, page, rows));
                 Debug.WriteLine("returned " + users.Items.Count);
 
                 return users;
             }
             catch (RateLimitExceededException limit)
             {
+                Debug.WriteLine(limit.Message);
                 WaitForLimitRequestsPerMinute();
                 return await GetUsersFrom(location, page, rows);
             }
@@ -156,6 +158,7 @@ namespace GitHub.API.Service.Impl
             }
             catch(RateLimitExceededException limit)
             {
+                Debug.WriteLine(limit.Message);
                 WaitForLimitRequestsPerMinute();
                 return await GetTotalCommitsByUser(userName);
             }
@@ -185,6 +188,7 @@ namespace GitHub.API.Service.Impl
             }
             catch (RateLimitExceededException limit)
             {
+                Debug.WriteLine(limit.Message);
                 WaitForLimitRequestsPerMinute();
                 return await GetTotalCommitsByUser(userName);
             }
@@ -198,7 +202,7 @@ namespace GitHub.API.Service.Impl
         private void WaitForLimitRequestsPerMinute()
         {
             Debug.WriteLine("----- waitting a minute :( -----");
-            Thread.Sleep(_MILLISECONDS_WAIT_FOR_AVOID_LIMIT);
+            Thread.Sleep(MILLISECONDS_WAIT_FOR_AVOID_LIMIT);
         }
     }
 }

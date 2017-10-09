@@ -18,11 +18,11 @@ namespace GitHub.API.Service.Impl
 
         private IRepository _loadDataRepository;
 
-        private const int _GITHUB_LIMIT_ROWS_PAGE = 100;
+        private const int GITHUB_LIMIT_ROWS_PAGE = 100;
 
-        private const int _GITHUB_LIMIT_SAME_QUERY_TOTAL = 1000;
+        private const int GITHUB_LIMIT_SAME_QUERY_TOTAL = 1000;
 
-        private const int _MONTHS_TO_SEARCH_FOR_RANGE_DATE = 3;
+        private const int MONTHS_TO_SEARCH_FOR_RANGE_DATE = 3;
 
 
         public LoadDataService(
@@ -41,7 +41,7 @@ namespace GitHub.API.Service.Impl
                 throw new ArgumentNullException("location is mandatory");
 
             DateTime dtStart = new DateTime(2008, 4, 1); //Github startup started
-            DateTime dtEnd = dtStart.AddMonths(_MONTHS_TO_SEARCH_FOR_RANGE_DATE);
+            DateTime dtEnd = dtStart.AddMonths(MONTHS_TO_SEARCH_FOR_RANGE_DATE);
 
             do
             {
@@ -49,7 +49,7 @@ namespace GitHub.API.Service.Impl
                 {
                     var dateRange = new DateRange(dtStart, dtEnd);
 
-                    var result = await _provider.GetUsersFrom(location, dateRange, 1, _GITHUB_LIMIT_ROWS_PAGE);
+                    var result = await _provider.GetUsersFrom(location, dateRange, 1, GITHUB_LIMIT_ROWS_PAGE);
 
                     var dataToSave = new List<User>(result.Items);
 
@@ -57,7 +57,7 @@ namespace GitHub.API.Service.Impl
                     {
                         for (int i = 2; i <= GetNumPages(result.TotalCount); i++)
                         {
-                            var resultWithPages = await _provider.GetUsersFrom(location, dateRange, i, _GITHUB_LIMIT_ROWS_PAGE);
+                            var resultWithPages = await _provider.GetUsersFrom(location, dateRange, i, GITHUB_LIMIT_ROWS_PAGE);
 
                             dataToSave.AddRange(resultWithPages.Items);
                         }
@@ -74,8 +74,8 @@ namespace GitHub.API.Service.Impl
                 }
                 finally
                 {
-                    dtStart = dtStart.AddMonths(_MONTHS_TO_SEARCH_FOR_RANGE_DATE);
-                    dtEnd = dtEnd.AddMonths(_MONTHS_TO_SEARCH_FOR_RANGE_DATE);
+                    dtStart = dtStart.AddMonths(MONTHS_TO_SEARCH_FOR_RANGE_DATE);
+                    dtEnd = dtEnd.AddMonths(MONTHS_TO_SEARCH_FOR_RANGE_DATE);
                 }
             }
             while (dtStart <= DateTime.Now);
@@ -86,7 +86,7 @@ namespace GitHub.API.Service.Impl
             if (string.IsNullOrEmpty(location))
                 throw new ArgumentNullException("location is mandatory");
 
-            var result = await _provider.GetUsersFrom(location, 1, _GITHUB_LIMIT_ROWS_PAGE);
+            var result = await _provider.GetUsersFrom(location, 1, GITHUB_LIMIT_ROWS_PAGE);
 
             _statusService.SetRunning(location, result.TotalCount);
 
@@ -98,7 +98,7 @@ namespace GitHub.API.Service.Impl
                 {
                     for (int i = 2; i <= GetNumPages(result.TotalCount); i++)
                     {
-                        var resultWithPages = await _provider.GetUsersFrom(location, i, _GITHUB_LIMIT_ROWS_PAGE);
+                        var resultWithPages = await _provider.GetUsersFrom(location, i, GITHUB_LIMIT_ROWS_PAGE);
                         dataToSave.AddRange(resultWithPages.Items);
                     }
                 }
@@ -155,17 +155,17 @@ namespace GitHub.API.Service.Impl
 
         private int GetNumPages(double total)
         {
-            return (int)Math.Ceiling((double)total / _GITHUB_LIMIT_ROWS_PAGE);
+            return (int)Math.Ceiling((double)total / GITHUB_LIMIT_ROWS_PAGE);
         }
 
         private bool CanUseTheSameQueryForAllResults(int total)
         {
-            return (total <= _GITHUB_LIMIT_SAME_QUERY_TOTAL);
+            return (total <= GITHUB_LIMIT_SAME_QUERY_TOTAL);
         }
 
         private bool HaveMoreThanOnePage(int total)
         {
-            return (total > _GITHUB_LIMIT_ROWS_PAGE);
+            return (total > GITHUB_LIMIT_ROWS_PAGE);
         }
     }
 }
