@@ -59,9 +59,7 @@ You could download <a href="https://code.visualstudio.com/">Visual Studio Code</
 
 <h3>Cache & Repository </h3>
 <p>The first MVP use process caching for store all necessary information and sort list in memory. All code is decouple with interfaces (interface segregation principle). Now is very easly implement any other distributed caching technology like Redis (Open/Close principle).</p>
-<br><br>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/implmemory.jpg">
-<br><br>
 
 <h3>Next steps</h3>
  <ul>
