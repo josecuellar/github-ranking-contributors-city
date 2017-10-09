@@ -19,7 +19,7 @@ The service should give the possibility to choose between the Top 50, Top 100 or
 
 <h4>Solution</h4>
 
-<u>Technologies</u>
+<b>Technologies</b>
 
 <ul>
     <li>REST Http Service with <b>.NET Core 2</b><br>Download SDK: <a href="https://www.microsoft.com/net/download/core">https://www.microsoft.com/net/download/core</a></li>
@@ -29,7 +29,7 @@ The service should give the possibility to choose between the Top 50, Top 100 or
 
 You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a> with <a href="https://github.com/OmniSharp/omnisharp-vscode">OmniSharp extension</a> for support for <b>C# 7.1 & .NET Core 2</b>.
 
-<u>Using API method (valid endpoints)</u>
+<b>Using API method (valid endpoints)</b>
 
 <p>
     api/user/<b>Valencia</b>/<i>50</i><br>
