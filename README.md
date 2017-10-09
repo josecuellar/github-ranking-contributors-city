@@ -22,7 +22,7 @@ The service should give the possibility to choose between the Top 50, Top 100 or
 <b>Technologies</b>
 
 <ul>
-    <li>* Use GitHub personal API token. Please you must generate it for you and paste token in <b>Service/Impl/OctokitGitHubApiProvider.cs</b></li>
+    <li>Use GitHub personal API token. <br><i>Please you must generate it for you and paste token in <b>Service/Impl/OctokitGitHubApiProvider.cs</b></i></li>
     <li>REST Http Service with <b>.NET Core 2</b><br>Download SDK: <a href="https://www.microsoft.com/net/download/core">https://www.microsoft.com/net/download/core</a></li>
     <li>C# 7 with Visual Studio 2017</li>
     <li><a href="https://github.com/octokit/octokit.net">Octokit.GitHub</a></li>
