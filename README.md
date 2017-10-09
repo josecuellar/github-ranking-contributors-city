@@ -57,13 +57,13 @@ You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a>
  </ul>
 
 <u>SNAPSHOT Running Status</u><br>
-<img src="http://github-ranking-contributors-city/src/GitHub.API/Images/running.jpg">
+<img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/running.jpg">
 
 <u>SNAPSHOT Running Status</u><br>
-<img src="http://github-ranking-contributors-city/src/GitHub.API/Images/running2.jpg">
+<img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/running2.jpg">
 
 <u>SNAPSHOT Calculating Order Status</u><br>
-<img src="http://github-ranking-contributors-city/src/GitHub.API/Images/calculatingorder.jpg">
+<img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/calculatingorder.jpg">
 
 <u>SNAPSHOT Finished Status</u><br>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/finished.jpg">
