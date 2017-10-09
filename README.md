@@ -32,13 +32,10 @@ You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a>
 <u>Using API method (valid endpoints)</u>
 
 <p>
-    /users/<b>Valencia</b>/<i>50</i><br>
-    /users/<b>Barcelona</b>/<i>100</i><br>
-    /users/<b>Tarragona</b>/<i>150</i><br>
+    api/user/<b>Valencia</b>/<i>50</i><br>
+    api/user/<b>Barcelona</b>/<i>100</i><br>
+    api/user/<b>Tarragona</b>/<i>150</i><br>
 </p>    
-
-<U>The method have three four</U>:
-
 
 <h4>Response</h4>
 
@@ -47,15 +44,15 @@ You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a>
         <B>Status</B>
         <ul>
             <li><U>FINISHED</U>: The process is done.</li>
-            <li><u>RUNNING</u>: The process is runnning (getting users).</li>
+            <li><u>RUNNING</u>: The process is runnning (getting users by location).</li>
             <li><u>CALCULATING_ORDER</u>: The process is calculating order (getting total of commits and repositories by user).</li>
             <li><u>STOPPED</u>: The process not have loaded this location.</li>
         </ul>
     </li>
     <li><B>TotalResults</B>: Total results found</li>
-    <li><B>TotalResultsLoaded</B>: Number of users loaded in request</li>
+    <li><B>TotalResultsLoaded</B>: Number of users loaded processed</li>
     <li><B>LastUpdated</B> <I>[Only when is FINISHED]</I>: Date time with last results updated</li>
-    <li><B>TotalOrderCalculated</B> <I>[Only when is CALCULATING_ORDER]</I>: Number of users with number of commits and repositories fetched</li>
+    <li><B>TotalOrderCalculated</B> <I>[Only when is CALCULATING_ORDER]</I>: Number of users with number of commits and repositories processsed fetched</li>
     <li><B>Users</B>: List of top 50/100/150 contributors</li>
  </ul>
 
