@@ -56,6 +56,10 @@ You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a>
     <li><B>Users</B>: List of top 50/100/150 contributors</li>
  </ul>
 
+<u>SNAPSHOT Running Status</u>
+![alt text](http://github-ranking-contributors-city/src/GitHub.API/Images/running.jpg)
+
+
 </body>
 </html>
 
