@@ -7,7 +7,7 @@ Given a <b>city name</b> (<i>e.g. Barcelona</i>) the service returns a list of t
 The service should give the possibility to choose between the Top 50, Top 100 or Top
 150 contributors</p>
 
-<h4>GitHub API Rate Limit</h4>
+<h4>GitHub API Limits (using personal API tokens)</h4>
 <ul>
     <li>30 requests minute for authorized user</li>
     <li>1.000 total results for search (with the same filters paged)</li>
@@ -22,6 +22,7 @@ The service should give the possibility to choose between the Top 50, Top 100 or
 <b>Technologies</b>
 
 <ul>
+    <li>* Use GitHub personal API token. Please you must generate it for you and paste token in <b>Service/Impl/OctokitGitHubApiProvider.cs</b></li>
     <li>REST Http Service with <b>.NET Core 2</b><br>Download SDK: <a href="https://www.microsoft.com/net/download/core">https://www.microsoft.com/net/download/core</a></li>
     <li>C# 7 with Visual Studio 2017</li>
     <li><a href="https://github.com/octokit/octokit.net">Octokit.GitHub</a></li>

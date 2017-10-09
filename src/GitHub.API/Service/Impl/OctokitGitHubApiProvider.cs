@@ -11,7 +11,7 @@ namespace GitHub.API.Service.Impl
     public class OctokitGitHubApiProvider : IGitHubApiProvider
     {
 
-        private const string ACCESS_TOKEN = "8c02f531b445aa629db2efd8e03ad35e4f638941";
+        private const string ACCESS_TOKEN = "XXXXXXXXXXXXXXXX";
 
         private int MILLISECONDS_WAIT_FOR_AVOID_LIMIT = 60000; 
 
