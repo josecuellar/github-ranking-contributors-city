@@ -28,15 +28,15 @@ The service should give the possibility to choose between the Top 50, Top 100 or
     <li><a href="https://github.com/octokit/octokit.net">Octokit.GitHub</a></li>
 </ul>
 
-You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a> with <a href="https://github.com/OmniSharp/omnisharp-vscode">OmniSharp extension</a> for support for <b>C# 7.1 & .NET Core 2</b>.
+You could download <a href="https://code.visualstudio.com/">Visual Studio Code</a> with <a href="https://github.com/OmniSharp/omnisharp-vscode">OmniSharp extension</a> for support for <b>C# 7.1 & .NET Core 2</b>.
 
 <h3>API method (endpoints examples)</h3>
 
-<p>
+<pre>
     api/user/<b>Valencia</b>/<i>50</i><br>
     api/user/<b>Barcelona</b>/<i>100</i><br>
     api/user/<b>Tarragona</b>/<i>150</i><br>
-</p>    
+</pre>    
 
 <h3>Response</h3>
 
@@ -57,17 +57,13 @@ You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a>
     <li><B>Users</B>: List of top 50/100/150 contributors</li>
  </ul>
 
-<br><br>
-
-<h3>Cache & Repository </h3><br><br>
+<h3>Cache & Repository </h3>
 <p>The first MVP use process caching for store all necessary information and sort list in memory. All code is decouple with interfaces (interface segregation principle). Now is very easly implement any other distributed caching technology like Redis (Open/Close principle).</p>
 <br><br>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/implmemory.jpg">
 <br><br>
 
 <h3>Next steps</h3>
-<br><br>
-
  <ul>
     <li>Implement <a href="https://redis.io/">Redis</a> repository</li>
     <li>Use <a href="https://redis.io/commands/sort">SortedList</a> rather than Linq</li>
@@ -75,15 +71,13 @@ You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a>
     <li>Deploy solution in <a href="https://www.docker.com/what-container">Docker Container</a></li>
  </ul>
 
-<br><br>
-
-<h3>SNAPSHOT Running Status</h3><br><br>
+<h4>SNAPSHOT Running Status</h4>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/running2.jpg">
 
-<h3>SNAPSHOT Calculating Order Status</h3><br><br>
+<h4>SNAPSHOT Calculating Order Status</h4>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/calculatingorder.jpg">
 
-<h3>SNAPSHOT Finished Status</h3><br><br>
+<h4>SNAPSHOT Finished Status</h4>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/finished.jpg">
 
 </body>
