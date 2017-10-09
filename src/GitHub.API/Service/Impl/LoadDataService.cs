@@ -13,17 +13,12 @@ namespace GitHub.API.Service.Impl
     {
 
         private IGitHubApiProvider _provider;
-
         private IStatusRepository _statusService;
-
         private IRepository _loadDataRepository;
 
         private const int GITHUB_LIMIT_ROWS_PAGE = 100;
-
         private const int GITHUB_LIMIT_SAME_QUERY_TOTAL = 1000;
-
         private const int MONTHS_TO_SEARCH_FOR_RANGE_DATE = 3;
-
 
         public LoadDataService(
             IGitHubApiProvider provider,
@@ -34,7 +29,6 @@ namespace GitHub.API.Service.Impl
             _loadDataRepository = loadDataRepository;
             _statusService = statusService;
         }
-
 
         public async Task LoadUsersFromLocationByMonthInvertals(string location)
         {
@@ -53,8 +47,7 @@ namespace GitHub.API.Service.Impl
                     var result = await _provider.GetUsersFrom(location, dateRange, 1, GITHUB_LIMIT_ROWS_PAGE);
                     SetResults(result.Items, location);
 
-                    if (HaveMoreThanOnePage(result.TotalCount))
-                        FireParallelLoopPages(GetNumPages(result.TotalCount), location, dateRange);
+                    await PaginateIfNeeded(result.TotalCount, location, dateRange);
                 }
                 catch (Exception err)
                 {
@@ -78,42 +71,27 @@ namespace GitHub.API.Service.Impl
 
             _statusService.SetRunning(location, result.TotalCount);
 
-            if (CanUseTheSameQueryForAllResults(result.TotalCount))
-            {
-                SetResults(result.Items, location);
-
-                if (HaveMoreThanOnePage(result.TotalCount))
-                    FireParallelLoopPages(GetNumPages(result.TotalCount), location);
-
-                _statusService.SetCalculatingOrder(location);
-
-                new Thread(async () =>
-                {
-                    Thread.CurrentThread.IsBackground = true;
-
-                    await SetAllReposAndCommits(location);
-
-                    _statusService.SetFinished(location, result.TotalCount);
-
-                }).Start();
-
-                return;
-            }
+            SetResults(result.Items, location);
 
             new Thread(async () =>
             {
+                if (CanUseTheSameQueryForAllResults(result.TotalCount))
+                    await PaginateIfNeeded(result.TotalCount, location);
+                else
+                    await LoadUsersFromLocationByMonthInvertals(location);
 
-                Thread.CurrentThread.IsBackground = true;
-
-                await LoadUsersFromLocationByMonthInvertals(location);
-
-                _statusService.SetCalculatingOrder(location);
-
-                await SetAllReposAndCommits(location);
-
-                _statusService.SetFinished(location, result.TotalCount);
+                await CalculateOrderAndFinalize(result, location);
 
             }).Start();
+        }
+
+        private async Task CalculateOrderAndFinalize(SearchUsersResult result, string location)
+        {
+            _statusService.SetCalculatingOrder(location);
+
+            await SetAllReposAndCommits(location);
+
+            _statusService.SetFinished(location, result.TotalCount);
         }
 
         private async Task SetAllReposAndCommits(string location)
@@ -152,30 +130,30 @@ namespace GitHub.API.Service.Impl
             _statusService.AddLoaded(location, _loadDataRepository.Set(concurrentDict, location));
         }
 
-        private void FireParallelLoopPages(int numPages, string location, DateRange dateRange)
+        private async Task PaginateIfNeeded(int totalCount, string location, DateRange dateRange)
         {
-            Parallel.For(2,
-                numPages,
-                new ParallelOptions { MaxDegreeOfParallelism = 100 },
-                async numberPage =>
+            if (HaveMoreThanOnePage(totalCount))
+            {
+                int pages = GetNumPages(totalCount);
+                for (int i = 2; i <= pages; i++)
                 {
-                    var resultWithPages = await _provider.GetUsersFrom(location, dateRange, numberPage, GITHUB_LIMIT_ROWS_PAGE);
+                    var resultWithPages = await _provider.GetUsersFrom(location, dateRange, i, GITHUB_LIMIT_ROWS_PAGE);
                     SetResults(resultWithPages.Items, location);
                 }
-            );
+            }
         }
 
-        private void FireParallelLoopPages(int numPages, string location)
+        private async Task PaginateIfNeeded(int totalCount, string location)
         {
-            Parallel.For(2,
-                numPages,
-                new ParallelOptions { MaxDegreeOfParallelism = 100 },
-                async numberPage =>
+            if (HaveMoreThanOnePage(totalCount))
+            {
+                int pages = GetNumPages(totalCount);
+                for (int i = 2; i <= pages; i++)
                 {
-                    var resultWithPages = await _provider.GetUsersFrom(location, numberPage, GITHUB_LIMIT_ROWS_PAGE);
+                    var resultWithPages = await _provider.GetUsersFrom(location, i, GITHUB_LIMIT_ROWS_PAGE);
                     SetResults(resultWithPages.Items, location);
                 }
-            );
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ namespace GitHub.API.Service.Impl
 
         private const string ACCESS_TOKEN = "8c02f531b445aa629db2efd8e03ad35e4f638941";
 
-        private int MILLISECONDS_WAIT_FOR_AVOID_LIMIT = 60000; //Limit 1 minute per 30 requestsresult
+        private int MILLISECONDS_WAIT_FOR_AVOID_LIMIT = 60000; 
 
         private static GitHubClient _client = null;
         private static GitHubClient GetClient
@@ -29,8 +29,6 @@ namespace GitHub.API.Service.Impl
             }
         }
 
-        //The Search API has a custom rate limit. For requests using Basic Authentication, OAuth, or client ID and secret, you can make up to 30 requests per minute.
-        //Get by date range for avoid limit of 1000 results for with the same filters
         public async Task<SearchUsersResult> GetUsersFrom(string location, DateRange dateRange, int page, int rows)
         {
             try
@@ -63,9 +61,6 @@ namespace GitHub.API.Service.Impl
 
                 if (rateLimit.Remaining == 0)
                     WaitForLimitRequestsPerMinute();
-
-                Debug.WriteLine(string.Format("query: location {0}, page {1}, rows{2}, date range {3} ", location, page, rows, dateRange));
-                Debug.WriteLine("returned " + users.Items.Count);
 
                 return users;
             }
@@ -110,9 +105,6 @@ namespace GitHub.API.Service.Impl
 
                 if (rateLimit.Remaining == 0)
                     WaitForLimitRequestsPerMinute();
-
-                Debug.WriteLine(string.Format("query: location {0}, page {1}, rows {2}", location, page, rows));
-                Debug.WriteLine("returned " + users.Items.Count);
 
                 return users;
             }
@@ -201,7 +193,7 @@ namespace GitHub.API.Service.Impl
 
         private void WaitForLimitRequestsPerMinute()
         {
-            Debug.WriteLine("----- waitting a minute :( -----");
+            Debug.WriteLine("---- WAITING :( ----");
             Thread.Sleep(MILLISECONDS_WAIT_FOR_AVOID_LIMIT);
         }
     }

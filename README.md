@@ -58,6 +58,24 @@ You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a>
 
 <br><br>
 
+<b>Cache & Repository </b><br><br>
+<p>The first MVP use process caching for store all necessary information and sort list in memory. All code is decouple with interfaces (interface segregation principle). Now is very easly implement any other distributed caching technology like Redis (Open/Close principle).</p>
+<br><br>
+<img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/implmemory.jpg">
+<br><br>
+
+<b>Next steps</b>
+<br><br>
+
+ <ul>
+    <li>Implement <a href="https://redis.io/">Redis</a> repository</li>
+    <li>Use <a href="https://redis.io/commands/sort">SortedList</a> rather than Linq</li>
+    <li>Optimize performance using tools like <a href="https://github.com/dotnet/BenchmarkDotNet">BenchmarkDotNet</a></li>
+    <li>Deploy solution in <a href="https://www.docker.com/what-container">Docker Container</a></li>
+ </ul>
+
+<br><br>
+
 <b>SNAPSHOT Running Status</b><br><br>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/running2.jpg">
 
