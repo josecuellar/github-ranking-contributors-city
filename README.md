@@ -56,18 +56,16 @@ You can download <a href="https://code.visualstudio.com/">Visual Studio Code</a>
     <li><B>Users</B>: List of top 50/100/150 contributors</li>
  </ul>
 
-<u>SNAPSHOT Running Status</u><br>
-<img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/running.jpg">
+<br><br>
 
-<u>SNAPSHOT Running Status</u><br>
+<b>SNAPSHOT Running Status</b><br><br>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/running2.jpg">
 
-<u>SNAPSHOT Calculating Order Status</u><br>
+<b>SNAPSHOT Calculating Order Status</b><br><br>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/calculatingorder.jpg">
 
-<u>SNAPSHOT Finished Status</u><br>
+<b>SNAPSHOT Finished Status</b><br><br>
 <img src="https://github.com/josecuellar/github-ranking-contributors-city/blob/master/src/GitHub.API/Images/finished.jpg">
-
 
 </body>
 </html>
