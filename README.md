@@ -30,10 +30,8 @@ The service should give the possibility to choose between the Top 50, Top 100 or
 You could download <a href="https://code.visualstudio.com/">Visual Studio Code</a> with <a href="https://github.com/OmniSharp/omnisharp-vscode">OmniSharp extension</a> for support for <b>C# 7.1 & .NET Core 2</b>.
 
 <br>
-```
 I have used gitHub personal API token: <br>
-<i>Please you must generate valid token for you <a href="https://github.com/blog/1509-personal-api-tokens">here</a> and paste it in <b><i>Service/Impl/OctokitGitHubApiProvider.cs</i></b></i>
-```
+<i>Please you must generate valid token for you <a href="https://github.com/blog/1509-personal-api-tokens">here</a> and paste it in <code>Service/Impl/OctokitGitHubApiProvider.cs</code></i>
 
 <h3>API method (endpoints examples)</h3>
 
