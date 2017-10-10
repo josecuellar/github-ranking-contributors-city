@@ -9,7 +9,7 @@ The service should give the possibility to choose between the Top 50, Top 100 or
 
 <h3>GitHub API Limits (using personal API tokens)</h3>
 <ul>
-    <li>30 requests minute for authorized user</li>
+    <li>30 requests minute</li>
     <li>1.000 total results for search (with the same filters paged)</li>
     <li>5000 requests hour</li>
     <li>100 results per page</li>
@@ -22,13 +22,16 @@ The service should give the possibility to choose between the Top 50, Top 100 or
 <b>Technologies</b>
 
 <ul>
-    <li>Use GitHub personal API token. <br><i>Please you must generate it for you and paste token in <b>Service/Impl/OctokitGitHubApiProvider.cs</b></i></li>
     <li>REST Http Service with <b>.NET Core 2</b><br>Download SDK: <a href="https://www.microsoft.com/net/download/core">https://www.microsoft.com/net/download/core</a></li>
     <li>C# 7 with Visual Studio 2017</li>
     <li><a href="https://github.com/octokit/octokit.net">Octokit.GitHub</a></li>
 </ul>
 
 You could download <a href="https://code.visualstudio.com/">Visual Studio Code</a> with <a href="https://github.com/OmniSharp/omnisharp-vscode">OmniSharp extension</a> for support for <b>C# 7.1 & .NET Core 2</b>.
+
+<br>
+I have used gitHub personal API token: <br>
+<i>Please you must generate valid token for you <a href="https://github.com/blog/1509-personal-api-tokens">here</a> and paste it in <b><i>Service/Impl/OctokitGitHubApiProvider.cs</i></b></i>
 
 <h3>API method (endpoints examples)</h3>
 
