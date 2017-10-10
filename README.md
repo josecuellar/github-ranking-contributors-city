@@ -11,7 +11,7 @@ The service should give the possibility to choose between the Top 50, Top 100 or
 <ul>
     <li>30 requests minute</li>
     <li>1.000 total results for search (with the same filters paged)</li>
-    <li>5000 requests hour</li>
+    <li>5.000 requests hour</li>
     <li>100 results per page</li>
 </ul>
 
@@ -82,6 +82,3 @@ You could download <a href="https://code.visualstudio.com/">Visual Studio Code</
 
 </body>
 </html>
-
-
-
