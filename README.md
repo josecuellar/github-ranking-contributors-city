@@ -65,9 +65,10 @@ You could download <a href="https://code.visualstudio.com/">Visual Studio Code</
 
 <h3>Next steps</h3>
  <ul>
+    <li>Calculate start date and end date for searching users by interval for increase number of requests in results with more than 1.000 results</li>
+    <li>Optimize performance using tools like <a href="https://github.com/dotnet/BenchmarkDotNet">BenchmarkDotNet</a></li>
     <li>Implement <a href="https://redis.io/">redis</a></li>
     <li>Use <a href="https://redis.io/commands/sort">SortedList</a> rather than <a href="https://msdn.microsoft.com/en-us/library/bb308959.aspx">Linq</a></li>
-    <li>Optimize performance using tools like <a href="https://github.com/dotnet/BenchmarkDotNet">BenchmarkDotNet</a></li>
     <li>Deploy solution in <a href="https://www.docker.com/what-container">docker</a></li>
  </ul>
 
