@@ -34,7 +34,7 @@ namespace GitHub.API.Service.Impl
             try
             {
                 if (string.IsNullOrEmpty(location))
-                    throw (new ArgumentNullException("userName is mandatory"));
+                    throw (new ArgumentNullException("location is mandatory"));
 
                 if (page <= 0)
                     throw (new ArgumentNullException("page not valid"));
@@ -82,7 +82,7 @@ namespace GitHub.API.Service.Impl
             try
             {
                 if (string.IsNullOrEmpty(location))
-                    throw (new ArgumentNullException("userName is mandatory"));
+                    throw (new ArgumentNullException("location is mandatory"));
 
                 if (page <= 0)
                     throw (new ArgumentNullException("page not valid"));

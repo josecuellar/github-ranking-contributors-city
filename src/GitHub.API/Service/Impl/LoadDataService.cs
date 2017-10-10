@@ -35,7 +35,9 @@ namespace GitHub.API.Service.Impl
             if (string.IsNullOrEmpty(location))
                 throw new ArgumentNullException("location is mandatory");
 
-            DateTime dtStart = new DateTime(2008, 4, 1); //Github startup started
+            //TO-DO: Calculate datetime since for intervals ordering first request results by joined user
+            DateTime dtStart = new DateTime(2008, 4, 1); 
+            //**
             DateTime dtEnd = dtStart.AddMonths(MONTHS_TO_SEARCH_FOR_RANGE_DATE);
 
             do
